@@ -24,7 +24,7 @@ jobs:
           
       - name: Run happy-path
         run: |
-          docker run -it \
+          docker run \
           -e "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
           -e "AGENCY_EMAIL=${{ secrets.AGENCY_EMAIL }}" \
           -e "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" \

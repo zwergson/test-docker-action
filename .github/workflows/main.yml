@@ -1,0 +1,41 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Happy Path
+
+# Controls when the action will run. 
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Docker Login
+        uses: docker/login-action@v1.9.0
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_USERNAME }}
+          
+      - name: Run happy-path
+        run: |
+          docker run -it \
+          -e "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
+          -e "AGENCY_EMAIL=${{ secrets.AGENCY_EMAIL }}" \
+          -e "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" \
+          -e "AGENCY_PASSWORD=${{ secrets.AGENCY_PASSWORD }}" \
+          -e "API_URL=${{ secrets.API_URL }}" \
+          -e "CLIENT_NAME=${{ secrets.CLIENT_NAME }}" \
+          -e "FORMAT_NAME=${{ secrets.FORMAT_NAME }}" \
+          -e "INTERMEDIATE_STEPS=${{ secrets.INTERMEDIATE_STEPS }}" \
+          -e "STUDIO_URL=${{ secrets.STUDIO_URL }}" \
+          -e "PACKAGE_NAME=${{ secrets.PACKAGE_NAME }}" \
+          -e "CONCEPT_NAME=${{ secrets.CONCEPT_NAME }}" \
+          -e "TERM=xterm-256color" \
+          --name "hp" \
+          shuttlerock/happy-path

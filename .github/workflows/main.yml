@@ -35,7 +35,6 @@ jobs:
           -e "INTERMEDIATE_STEPS=${{ secrets.INTERMEDIATE_STEPS }}" \
           -e "STUDIO_URL=${{ secrets.STUDIO_URL }}" \
           -e "PACKAGE_NAME=${{ secrets.PACKAGE_NAME }}" \
-          -e "CONCEPT_NAME=${{ secrets.CONCEPT_NAME }}" \
           -e "TERM=xterm-256color" \
           --name "hp" \
           shuttlerock/happy-path

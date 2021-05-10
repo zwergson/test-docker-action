@@ -22,10 +22,20 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: Smoke Test # default: 8398a7@action-slack
+          fields: repo,commit,message,author # default: repo,commit
+          mention: here
+          if_mention: failure,cancelled
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
       - name: Run happy-path
         id: docker
         run: |
-          echo '::set-output name=result::$(docker run \
+          docker run \
           -e "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
           -e "AGENCY_EMAIL=${{ secrets.AGENCY_EMAIL }}" \
           -e "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" \
@@ -38,7 +48,7 @@ jobs:
           -e "PACKAGE_NAME=${{ secrets.PACKAGE_NAME }}" \
           -e "TERM=xterm-256color" \
           --name "hp" \
-          shuttlerock/happy-path)'
+          shuttlerock/happy-path
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}

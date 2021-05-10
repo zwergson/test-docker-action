@@ -37,4 +37,10 @@ jobs:
           -e "PACKAGE_NAME=${{ secrets.PACKAGE_NAME }}" \
           -e "TERM=xterm-256color" \
           --name "hp" \
-          shuttlerock/happy-path
+          shuttlerock/happy-path > log.txt 2>&1
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          MSG_MINIMAL: true
+          SLACK_MESSAGE: ${ cat log.txt }

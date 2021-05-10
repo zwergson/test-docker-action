@@ -22,6 +22,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
           
+      - name: Slack Notification
+        if: ${{ always() }}
+        run: |
+          curl -X POST -H "Content-type: application/json" --data '{"text":"${cat log.txt}"}' ${{ secrets.SLACK_WEBHOOK }}
       - name: Run happy-path
         run: |
           docker run \
@@ -41,6 +45,4 @@ jobs:
       - name: Slack Notification
         if: ${{ always() }}
         run: |
-          curl -X POST -H "Content-type: application/json" --data '{"text":"${cat log.txt}"}'
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          curl -X POST -H "Content-type: application/json" --data '{"text":"${cat log.txt}"}' ${{ secrets.SLACK_WEBHOOK }}

@@ -15,7 +15,7 @@ jobs:
       - run: echo ${{ toJSON(github) }}
       - name: Run smoke test on staging
         id: smoke-test-staging
-        if: github.event.prod == false
+        if: github.event.environment == 'staging'
         run: |
           docker run \
           -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
@@ -33,7 +33,7 @@ jobs:
           ghcr.io/$IMAGE_NAME
       - name: Run smoke test on production
         id: smoke-test-production
-        if: github.event.prod == true
+        if: github.event.environment == 'production'
         run: |
           docker run \
           -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
@@ -50,6 +50,7 @@ jobs:
           --name "hp" \
           ghcr.io/$IMAGE_NAME
       - uses: 8398a7/action-slack@v3
+        if: (github.event.environment == 'production') || (github.event.environment == 'staging')
         with:
           status: ${{ job.status }}
           author_name: Smoke Test
@@ -58,4 +59,3 @@ jobs:
           if_mention: failure,cancelled
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        if: always()

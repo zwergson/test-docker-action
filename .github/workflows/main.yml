@@ -14,53 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: env
-        env: ${{ toJSON(github) }}
-      - name: Login to Container Registry
-        run: echo ${{ secrets.GHCR_WRITE_TOKEN }} | docker login ghcr.io -u ${{ env.BOT_USER }} --password-stdin
-      - name: Run smoke test on staging
-        id: smoke-test-staging
-        if: github.event.environment == 'staging'
-        run: |
-          docker run \
-          -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
-          -e "AGENCY_EMAIL=creatos+e2eagency@shuttlerock.com" \
-          -e "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" \
-          -e "AGENCY_PASSWORD=${{ secrets.AGENCY_PASSWORD }}" \
-          -e "API_URL=https://order-api.shuttlestage.com/graphql" \
-          -e "CLIENT_NAME=[E2E] Test Client" \
-          -e "FORMAT_NAME=Stories" \
-          -e "INTERMEDIATE_STEPS=3" \
-          -e "STUDIO_URL=https://order.shuttlestage.com" \
-          -e "PACKAGE_NAME=[E2E] Test Package" \
-          -e "TERM=xterm-256color" \
-          --name "hp" \
-          ghcr.io/$IMAGE_NAME
-      - name: Run smoke test on production
-        id: smoke-test-production
-        if: github.event.environment == 'production'
-        run: |
-          docker run \
-          -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
-          -e "AGENCY_EMAIL=creatos+e2eagency@shuttlerock.com" \
-          -e "ADMIN_PASSWORD=${{ secrets.PROD_ADMIN_PASSWORD }}" \
-          -e "AGENCY_PASSWORD=${{ secrets.PROD_AGENCY_PASSWORD }}" \
-          -e "API_URL=https://order-api.shuttlerock.com/graphql" \
-          -e "CLIENT_NAME=[E2E] Test Client" \
-          -e "FORMAT_NAME=Stories 9:16" \
-          -e "INTERMEDIATE_STEPS=1" \
-          -e "STUDIO_URL=https://order.shuttlerock.com" \
-          -e "PACKAGE_NAME=[E2E] Test Package" \
-          -e "TERM=xterm-256color" \
-          --name "hp" \
-          ghcr.io/$IMAGE_NAME
       - uses: 8398a7/action-slack@v3
-        if: (github.event.environment == 'production') || (github.event.environment == 'staging')
         with:
           status: ${{ job.status }}
+          text: Smoke test on ${{ github.event.inputs.environment }} ${{ job.status }}
           author_name: Smoke Test
-          fields: repo,commit,message,author
+          fields: repo,took
           mention: here
-          if_mention: failure,cancelled
+          if_mention: always
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

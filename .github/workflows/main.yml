@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: Login to Container Registry
         run: echo ${{ secrets.GHCR_WRITE_TOKEN }} | docker login ghcr.io -u ${{ env.BOT_USER }} --password-stdin
+      - run: echo ${{ toJSON(github) }}
       - name: Run smoke test on staging
         id: smoke-test-staging
         if: github.event.prod == false

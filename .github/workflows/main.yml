@@ -15,9 +15,10 @@ jobs:
 
     steps:
       - uses: 8398a7/action-slack@v3
+        if: always()
         with:
           status: ${{ job.status }}
-          text: Smoke test on ${{ github.event.inputs.environment }} ${{ job.status }}
+          text: Smoke test on ${{ github.event.inputs.environment }} outcome is *${{ job.status }}*
           author_name: Smoke Test
           fields: repo,took
           mention: here

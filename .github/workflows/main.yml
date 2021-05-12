@@ -1,49 +1,58 @@
-# This is a basic workflow to help you get started with Actions
-
-name: Happy Path
-
-# Controls when the action will run. 
+name: Smoke Test
 on:
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  perform-smoke-test:
+    env:
+      IMAGE_NAME: shuttlerock/smoke-test
+      BOT_USER: sr-devops
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Docker Login
-        uses: docker/login-action@v1.9.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-          
-      - name: Run happy-path
-        id: docker
+      - name: Login to Container Registry
+        run: echo ${{ secrets.GHCR_WRITE_TOKEN }} | docker login ghcr.io -u ${{ env.BOT_USER }} --password-stdin
+      - name: Run smoke test on staging
+        id: smoke-test-staging
+        if: github.event.prod == false
         run: |
           docker run \
-          -e "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
-          -e "AGENCY_EMAIL=${{ secrets.AGENCY_EMAIL }}" \
+          -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
+          -e "AGENCY_EMAIL=creatos+e2eagency@shuttlerock.com" \
           -e "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" \
           -e "AGENCY_PASSWORD=${{ secrets.AGENCY_PASSWORD }}" \
-          -e "API_URL=${{ secrets.API_URL }}" \
-          -e "CLIENT_NAME=${{ secrets.CLIENT_NAME }}" \
-          -e "FORMAT_NAME=${{ secrets.FORMAT_NAME }}" \
-          -e "INTERMEDIATE_STEPS=${{ secrets.INTERMEDIATE_STEPS }}" \
-          -e "STUDIO_URL=${{ secrets.STUDIO_URL }}" \
-          -e "PACKAGE_NAME=${{ secrets.PACKAGE_NAME }}" \
+          -e "API_URL=https://order-api.shuttlestage.com/graphql" \
+          -e "CLIENT_NAME=[E2E] Test Client" \
+          -e "FORMAT_NAME=Stories" \
+          -e "INTERMEDIATE_STEPS=3" \
+          -e "STUDIO_URL=https://order.shuttlestage.com" \
+          -e "PACKAGE_NAME=[E2E] Test Package" \
           -e "TERM=xterm-256color" \
           --name "hp" \
-          shuttlerock/happy-path
+          ghcr.io/$IMAGE_NAME
+      - name: Run smoke test on production
+        id: smoke-test-production
+        if: github.event.prod == true
+        run: |
+          docker run \
+          -e "ADMIN_EMAIL=creatos+e2eadmin@shuttlerock.com" \
+          -e "AGENCY_EMAIL=creatos+e2eagency@shuttlerock.com" \
+          -e "ADMIN_PASSWORD=${{ secrets.PROD_ADMIN_PASSWORD }}" \
+          -e "AGENCY_PASSWORD=${{ secrets.PROD_AGENCY_PASSWORD }}" \
+          -e "API_URL=https://order-api.shuttlerock.com/graphql" \
+          -e "CLIENT_NAME=[E2E] Test Client" \
+          -e "FORMAT_NAME=Stories 9:16" \
+          -e "INTERMEDIATE_STEPS=1" \
+          -e "STUDIO_URL=https://order.shuttlerock.com" \
+          -e "PACKAGE_NAME=[E2E] Test Package" \
+          -e "TERM=xterm-256color" \
+          --name "hp" \
+          ghcr.io/$IMAGE_NAME
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          author_name: Smoke Test # default: 8398a7@action-slack
-          fields: repo,commit,message,author # default: repo,commit
+          author_name: Smoke Test
+          fields: repo,commit,message,author
           mention: here
           if_mention: failure,cancelled
         env:

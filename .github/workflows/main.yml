@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo ${{ toJSON(github) }}
+      - run: env
+        env: ${{ toJSON(github) }}
       - name: Login to Container Registry
         run: echo ${{ secrets.GHCR_WRITE_TOKEN }} | docker login ghcr.io -u ${{ env.BOT_USER }} --password-stdin
       - name: Run smoke test on staging

@@ -1,6 +1,10 @@
 name: Smoke Test
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'The environment to run smoke test against'
+        required:    true
 
 jobs:
   perform-smoke-test:

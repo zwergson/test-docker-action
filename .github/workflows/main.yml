@@ -14,15 +14,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: /usr/bin/notexists
-      - uses: 8398a7/action-slack@v3
-        if: always()
+      - name: Send message to Slack API
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
         with:
-          status: ${{ job.status }}
-          text: Smoke test on ${{ github.event.inputs.environment }} outcome is *${{ job.status }}*
-          author_name: Smoke Test
-          fields: repo,took
-          mention: here
-          if_mention: always
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C02228REZSL
+          slack-text: Hello! Something is burning! Or not...
+          slack-optional-icon_emoji: ":fire:"
+          slack-optional-as_user: false
